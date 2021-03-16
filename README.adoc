@@ -1,0 +1,180 @@
+= Camunda HELM Charts
+Doc Writer <paul.lungu@camunda.com>
+v1.0, 2020-03-15
+:toc:
+
+== Goals
+- Simple and understandable HELM Camunda example
+- Apply common configuration and architectural concepts
+- Good documentation with little to no assumptions of understanding HELM, Kubernetes or Camunda
+- Able to run quickly with no help out side this README
+
+== What is configured in this chart
+- [x] Camunda BPM 
+- [x] Load Balancer with sticky sessions
+- [x] Postgres Database
+
+
+== How to run this Helm chart
+
+*Install HELM and Kubernetes*
+====
+Though the goal of this is to be able to run this example quickly and easily the assumption is you have some experience with Kubernetes and HELM.
+
+You can find more on HELM here https://helm.sh/docs/intro/quickstart/[Helm Quickstart]
+====
+
+*See <<configure-external-database>> to Configure PostgreSQL in the Kubernetes cluster*
+
+**Run the Chart **
+====
+Run the folllowing command to install the chart and apply the configurations to the Kuberneted cluster
+----
+helm install workflow-demo ./camunda/camunda-helm/charts/camunda-bpm-platform/
+----
+
+When you make changes run the following command to apply the changes to the cluster
+----
+helm upgrade workflow-demo ./camunda/camunda-helm/charts/camunda-bpm-platform/
+----
+
+To remove the installation
+----
+helm uninstall workflow-demo
+----
+
+====
+
+==  How does it work
+
+=== valuse.yaml
+
+IMPORTANT: the primary configuration point is the values.yaml. The configs below have already been applied. The configs below are a quick reference for understanding.
+
+
+=== Configure the version of Camunuda
+====
+In this case the latest tomcat image is used. But we could swap different images and versions.
+
+See the https://hub.docker.com/r/camunda/camunda-bpm-platform/tags[Camunda Docker Tags] if you need a different version of Camunda.
+
+[source,yaml]
+----
+image:
+  repository: camunda/camunda-bpm-platform
+  tag: tomcat-latest
+  pullPolicy: IfNotPresent
+  pullSecrets: []
+----
+====
+
+=== Configure Load Balancer with Sticky Sessions
+
+*Install the NGINX Ingress Controller*
+====
+IMPORTANT: Kuberneted does not come with an implementation of a LoadBalancer or a Reverse Proxy for Ingress. The Ingerss resource allows you to configure a Controller for your needs. It's important to understand what you need from an inrgess resource then you can choose the appropriate Controller to install. There are a variety of vendors.
+
+*Tested with* https://kubernetes.github.io/ingress-nginx/deploy/#docker-for-mac
+
+----
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v0.44.0/deploy/static/provider/cloud/deploy.yaml
+----
+====
+
+
+*Configure the Ingress Resource for nginx with sticky sessions*
+====
+We will configure the Ingress Resource to tell the LoadBalancer (the NGINX deployment that was installed above) to stick to one Camunda instance once the user is logegd into the Camunda webapps.
+
+[source,yaml]
+----
+ingress:
+  enabled: true
+  annotations: {
+      kubernetes.io/ingress.class: nginx,
+      kubernetes.io/affinity: "cookie",
+      kubernetes.io/session-cookie-name: "JSESSIONID",
+      kubernetes.io/affinity-mode: "persistent",
+      kubernetes.io/session-cookie-expires: "172800",
+      kubernetes.io/session-cookie-max-age: "172800"
+    # kubernetes.io/tls-acme: "true"
+  }
+  hosts:
+    - host: camunda.127.0.0.1.nip.io
+      paths: ["/camunda","/engine-rest","/camunda-welcome"]
+  tls: []
+  #  - secretName: camunda-bpm-platform-tls
+  #    hosts:
+  #      - camunda-bpm-platform.local
+
+----
+====
+
+
+*Increase the replica count of Camunda Nodes*
+====
+
+We will increase the replica count so the load balancer will send requests to both nodes for a user that is not already logged in to Camunda webapps.
+
+[source,yaml]
+----
+general:
+  debug: true
+  replicaCount: 2
+  nameOverride: ""
+  fullnameOverride: ""
+----
+====
+
+[[configure-external-database]]
+=== Configure an External Database
+*Install PostgreSQL Database in the cluster*
+====
+----
+helm install workflow-database \
+  --set postgresqlUsername=workflow,postgresqlPassword=workflow,postgresqlDatabase=workflow bitnami/postgresql
+----
+====
+Based on: https://artifacthub.io/packages/helm/bitnami/postgresql
+
+*Create Kubernetes Secret Resource for Postgresql*
+====
+----
+kubectl create secret generic \
+    workflow-database-credentials \
+    --from-literal=DB_USERNAME=workflow \
+    --from-literal=DB_PASSWORD=workflow
+----
+====
+
+
+== Whats Next
+- [ ] Configuration for EE License
+- [ ] Configuration for Logging
+** [ ] Configuration for Log Drain
+- [ ] Configuration for Optimize
+- [ ] Configure Cawemo on Premise
+- [ ] Configuration for LDAP plugin
+- [ ] Configuration for metrics
+** with Prometheus
+- [ ] Configuration for Custom Camunda Build
+** with Spring-Boot
+- [ ] Configuration for CI/CD
+** [ ] Configuration for ARGO
+** [ ] Configuration for TERRAFORM
+- [ ] Configurations for SSO
+** [ ] with Keycloak
+- [ ] Configuration for GRAPHQL
+- [ ] Configuration for HAZELCAST
+- [ ] Configuration for Tracing
+- [ ] Configure auto-scaling
+
+== Based on Camunda Helm
+[![Artifact HUB](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/camunda)](https://artifacthub.io/packages/search?repo=camunda) ![Release Charts](https://github.com/camunda/camunda-helm/workflows/Release%20Charts/badge.svg)
+
+Camunda public Kubernetes Helm repo and charts.
+
+== Project state
+
+NOTE: This project is in **alpha** phase.
+

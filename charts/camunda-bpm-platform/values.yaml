@@ -3,8 +3,8 @@
 # Declare variables to be passed into your templates.
 
 general:
-  debug: false
-  replicaCount: 1
+  debug: true
+  replicaCount: 2
   nameOverride: ""
   fullnameOverride: ""
 
@@ -17,14 +17,23 @@ image:
 database:
   # In case H2 database is used.
   internal:
-    enabled: true
+    enabled: false
     diskSize: 1G
   # In case PostgreSQL or MySQL databases are used.
   external:
-    enabled: false
-    credentialsSecertName: ""
-    driver: ""
-    url: ""
+    enabled: true
+    credentialsSecertName: "workflow-postgresql-credentials"
+    driver: "org.postgresql.Driver"
+    url: "jdbc:postgresql://workflow-postgresql.default.svc.cluster.local:5432/workflow"
+
+# helm install workflow \
+#   --set postgresqlUsername=workflow,postgresqlPassword=workflow,postgresqlDatabase=workflow \
+#     bitnami/postgresql
+#
+# kubectl create secret generic \
+#     workflow-postgresql-credentials \
+#     --from-literal=DB_USERNAME=workflow \
+#     --from-literal=DB_PASSWORD=workflow
 
 service:
   type: ClusterIP
@@ -51,14 +60,24 @@ serviceAccount:
   # If not set and create is true, a name is generated using the fullname template
   name: ""
 
+# See link below to install nginx controller
+# https://artifacthub.io/packages/helm/bitnami/nginx-ingress-controller
+
 ingress:
-  enabled: false
-  annotations: {}
+  enabled: true
+  annotations: {
+      kubernetes.io/ingress.class: nginx,
+      kubernetes.io/affinity: "cookie",
+      kubernetes.io/session-cookie-name: "JSESSIONID",
+      kubernetes.io/affinity-mode: "persistent",
+      kubernetes.io/session-cookie-expires: "172800",
+      kubernetes.io/session-cookie-max-age: "172800"
+    }
     # kubernetes.io/ingress.class: nginx
     # kubernetes.io/tls-acme: "true"
   hosts:
-    - host: camunda-bpm-platform.local
-      paths: []
+    - host: camunda.127.0.0.1.nip.io
+      paths: ["/camunda","/engine-rest","/camunda-welcome"]
   tls: []
   #  - secretName: camunda-bpm-platform-tls
   #    hosts:
@@ -89,8 +108,8 @@ resources: {}
 
 autoscaling:
   enabled: false
-  minReplicas: 1
-  maxReplicas: 100
+  minReplicas: 2
+  maxReplicas: 3
   targetCPUUtilizationPercentage: 80
   # targetMemoryUtilizationPercentage: 80
 
