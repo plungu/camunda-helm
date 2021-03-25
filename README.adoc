@@ -197,9 +197,22 @@ For more configuration options see https://github.com/camunda/docker-camunda-bpm
 - [ ] Configure Cloud Deployments (GKE, AWS, Azure)
 
 == Based on Camunda Helm
-[![Artifact HUB](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/camunda)](https://artifacthub.io/packages/search?repo=camunda) ![Release Charts](https://github.com/camunda/camunda-helm/workflows/Release%20Charts/badge.svg)
 
-Camunda public Kubernetes Helm repo and charts.
+image:https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/camunda[link=https://artifacthub.io/packages/search?repo=camunda]
+
+image:https://github.com/camunda/camunda-helm/workflows/Release%20Charts/badge.svg[link=https://github.com/camunda/camunda-helm]
+
+
+*More Info*
+
+- https://artifacthub.io/packages/helm/camunda/camunda-bpm-platform
+- https://kubernetes.github.io/ingress-nginx/deploy/#docker-for-mac
+- https://helm.sh/docs/intro/quickstart/
+- https://hub.docker.com/r/camunda/camunda-bpm-platform
+- https://kubernetes.github.io/ingress-nginx/examples/affinity/cookie/
+- https://github.com/camunda/camunda-helm
+- https://github.com/camunda/docker-camunda-bpm-platform
+- https://artifacthub.io/packages/helm/bitnami/postgresql
 
 == Project state
 
