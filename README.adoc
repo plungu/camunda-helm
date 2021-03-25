@@ -200,9 +200,6 @@ For more configuration options see https://github.com/camunda/docker-camunda-bpm
 
 image:https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/camunda[link=https://artifacthub.io/packages/search?repo=camunda]
 
-image:https://github.com/camunda/camunda-helm/workflows/Release%20Charts/badge.svg[link=https://github.com/camunda/camunda-helm]
-
-
 *More Info*
 
 - https://artifacthub.io/packages/helm/camunda/camunda-bpm-platform
