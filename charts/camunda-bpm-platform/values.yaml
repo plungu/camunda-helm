@@ -22,18 +22,9 @@ database:
   # In case PostgreSQL or MySQL databases are used.
   external:
     enabled: true
-    credentialsSecertName: "workflow-postgresql-credentials"
+    credentialsSecertName: "workflow-database-credentials"
     driver: "org.postgresql.Driver"
-    url: "jdbc:postgresql://workflow-postgresql.default.svc.cluster.local:5432/workflow"
-
-# helm install workflow \
-#   --set postgresqlUsername=workflow,postgresqlPassword=workflow,postgresqlDatabase=workflow \
-#     bitnami/postgresql
-#
-# kubectl create secret generic \
-#     workflow-postgresql-credentials \
-#     --from-literal=DB_USERNAME=workflow \
-#     --from-literal=DB_PASSWORD=workflow
+    url: "jdbc:postgresql://workflow-database-postgresql.default.svc.cluster.local:5432/workflow"
 
 service:
   type: ClusterIP
@@ -66,18 +57,18 @@ serviceAccount:
 ingress:
   enabled: true
   annotations: {
-      kubernetes.io/ingress.class: nginx,
-      kubernetes.io/affinity: "cookie",
-      kubernetes.io/session-cookie-name: "JSESSIONID",
-      kubernetes.io/affinity-mode: "persistent",
-      kubernetes.io/session-cookie-expires: "172800",
-      kubernetes.io/session-cookie-max-age: "172800"
+      nginx.ingress.kubernetes.io/ingress.class: nginx,
+      nginx.ingress.kubernetes.io/affinity: "cookie",
+      nginx.ingress.kubernetes.io/affinity-mode: "persistent",
+      nginx.ingress.kubernetes.io/session-cookie-expires: "172800",
+      nginx.ingress.kubernetes.io/session-cookie-max-age: "172800",
     }
+    # see more config options https://kubernetes.github.io/ingress-nginx/examples/affinity/cookie/
     # kubernetes.io/ingress.class: nginx
     # kubernetes.io/tls-acme: "true"
   hosts:
     - host: camunda.127.0.0.1.nip.io
-      paths: ["/camunda","/engine-rest","/camunda-welcome"]
+      paths: ["/"]
   tls: []
   #  - secretName: camunda-bpm-platform-tls
   #    hosts:
