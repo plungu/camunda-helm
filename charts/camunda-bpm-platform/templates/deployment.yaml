@@ -76,20 +76,32 @@ spec:
           - name: camunda-h2-dbs
             mountPath: /camunda/camunda-h2-dbs
           {{- end }}
+          volumeMounts:
+          - mountPath: /camunda/.camunda/license.txt
+            subPath: license.txt
+            name: camunda-license
+
       {{ if .Values.database.internal.enabled -}}
       volumes:
         - name: camunda-h2-dbs
           persistentVolumeClaim:
             claimName: {{ include "camunda-bpm-platform.fullname" . }}-database
       {{- end }}
+      volumes:
+        - name: camunda-license
+          secret:
+            secretName: camunda-license
+
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+
       {{- with .Values.affinity }}
       affinity:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+
       {{- with .Values.tolerations }}
       tolerations:
         {{- toYaml . | nindent 8 }}

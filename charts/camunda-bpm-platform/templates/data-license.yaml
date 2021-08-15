@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  labels:
+    {{- include "camunda-bpm-platform.labels" . | nindent 4 }}
+  name: camunda-license
+stringData:
+  license.txt:
+    --------------- BEGIN CAMUNDA LICENSE KEY ---------------
+    --------------- END CAMUNDA LICENSE KEY ---------------

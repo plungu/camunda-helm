@@ -4,89 +4,88 @@ v1.0, 2020-03-15
 :toc:
 
 == Goals
-- Simple and understandable HELM Camunda example
-- Apply common configuration and architectural concepts
-- Good documentation with little to no assumptions of understanding HELM, Kubernetes or Camunda
-- Able to run quickly with no help out side this README
+- Simple and understandable HELM example
+- Help understand common configuration and architectural concepts
+- Good documentation and example to assist in getting running quickly in Kubernetes
+- *NOT* intended as a production ready configuration
 
 
 == What is configured in this chart
-- [x] Camunda BPM
-- [x] Load Balancer with sticky sessions
+- [x] Camunda BPM CE
+- [x] Camunda BPM EE
+- [x] Camunda License Install
+- [x] Internal Load Balancer Service (for clients like Optimize)
+- [x] External Ingress with sticky sessions
 - [x] Postgres Database
 
+== How does it work
 
-== How to run this Helm chart
+IMPORTANT: The configs in this chart are preconfigured defaults and serve as a quick reference for understanding. *You may need to change and adjust things to suit your use-case, infra, architecture, etc ...*
 
-*Install HELM and Kubernetes*
-====
-Though the goal of this is to be able to run this example quickly and easily the assumption is you have some experience with Kubernetes and HELM.
+- The HELM chart is an install descriptor to install Canunda on Kubernetes. HELM can do many things to help install and manage infra on Kubernetes.
+- The primary configuration point is the values.yaml. It should allow you to get a basic Canunda configuration installed and running with little to no customizations.
+- You still need to know how to debug on Kubernetes. See the https://kubernetes.io/docs/tasks/debug-application-cluster/debug-application/[Kubernetes Docs] for help.
+- While this chart defines how Canunda is installed other components need to be installed in your Kubernetes cluster to make Canunda work. See <<steps-to-run, Setting up Infra>> to install the other components.
+- You can find more on HELM here https://helm.sh/docs/intro/quickstart/[Helm Quickstart]
 
-You can find more on HELM here https://helm.sh/docs/intro/quickstart/[Helm Quickstart]
-====
+== Steps to run this HELM chart
 
-*See <<configure-external-database>> to Configure PostgreSQL in the Kubernetes cluster*
-
-**Run the Chart **
-====
-Run the folllowing command to install the chart and apply the configurations to the Kuberneted cluster
-----
-helm install workflow-demo ./camunda/camunda-helm/charts/camunda-bpm-platform/
-----
-
-When you make changes run the following command to apply the changes to the cluster
-----
-helm upgrade workflow-demo ./camunda/camunda-helm/charts/camunda-bpm-platform/
-----
-
-To remove the installation
-----
-helm uninstall workflow-demo
-----
+==== Before you run
+NOTE: These can be omitted if you run the basic HELM chart without the Postgres DB and only a single node in the cluster without a load balancer
 
 ====
+*Step 0. <<install-helm, Install HELM and Kubernetes>>* if not already installed
 
-==  How does it work
+*Step 1. <<install-ingress-controller, Install Ingress Contorller>> to configure the loadbalaner ingress controller*
 
-=== values.yaml
+*Step 2. <<configure-external-database, Configure PostgreSQL>> in the Kubernetes cluster*
 
-IMPORTANT: the primary configuration point is the values.yaml. The configs below have already been applied. The configs below are a quick reference for understanding.
+*Step 3. <<configure-camunda, Configure Camunda>>*
 
-
-=== Configure the version of Camunuda
-====
-In this case the latest tomcat image is used. But we could swap different images and versions.
-
-See the https://hub.docker.com/r/camunda/camunda-bpm-platform/tags[Camunda Docker Tags] if you need a different version of Camunda.
-
-[source,yaml]
-----
-image:
-  repository: camunda/camunda-bpm-platform
-  tag: tomcat-latest
-  pullPolicy: IfNotPresent
-  pullSecrets: []
-----
+*Step 4. <<run-camunda, Run Camunda>>*
 ====
 
-=== Configure Load Balancer with Sticky Sessions
+== [[setup-infra]] Setup Infra and Architecture for Camunda
 
-*Install the NGINX Ingress Controller*
+==== [[install-helm]] *Step 0:* Install HELM and Kubernetes
+====
+- You can find more on HELM here https://helm.sh/docs/intro/quickstart/[Helm Quickstart]
+- https://kubernetes.io/docs/setup/[Kubernetes Getting Started]
+- Try https://www.docker.com/products/docker-desktop[Docker Desktop] imo it's the quickest way to get started with Kubernetes
+
+- Tested with HELM
+** `version.BuildInfo{Version:"v3.5.3", GitCommit:"041ce5a2c17a58be0fcd5f5e16fb3e7e95fea622", GitTreeState:"dirty", GoVersion:"go1.16"}`
+
+- Tested with Kubernetes
+** `Client Version: version.Info{Major:"1", Minor:"21", GitVersion:"v1.21.2", GitCommit:"092fbfbf53427de67cac1e9fa54aaa09a28371d7", GitTreeState:"clean", BuildDate:"2021-06-16T12:59:11Z", GoVersion:"go1.16.5", Compiler:"gc", Platform:"darwin/amd64"}`
+
+** `Server Version: version.Info{Major:"1", Minor:"21", GitVersion:"v1.21.2", GitCommit:"092fbfbf53427de67cac1e9fa54aaa09a28371d7", GitTreeState:"clean", BuildDate:"2021-06-16T12:53:14Z", GoVersion:"go1.16.5", Compiler:"gc", Platform:"linux/amd64"}`
+
+====
+
+---
+[[install-ingress-controller]]
+=== *Step 1:* Configure Load Balancer with Sticky Sessions
+
+==== Install Ingress Controller
 ====
 IMPORTANT: Kuberneted does not come with an implementation of a LoadBalancer or a Reverse Proxy for Ingress. The Ingerss resource allows you to configure a Controller for your needs. It's important to understand what you need from an inrgess resource then you can choose the appropriate Controller to install. There are a variety of vendors.
 
 *Tested with* https://kubernetes.github.io/ingress-nginx/deploy/#docker-for-mac
 
+*Install the NGINX Ingress Controller*
 ----
 kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v0.44.0/deploy/static/provider/cloud/deploy.yaml
 ----
 ====
 
+---
 
-*Configure the Ingress Resource for nginx with sticky sessions*
+==== Configure the Ingress Resource for nginx with sticky sessions
 ====
 Update the values.yaml and configure the Ingress Resource to tell the LoadBalancer (the NGINX deployment that was installed above) to stick to one Camunda instance once the user is logged into the Camunda webapps.
 
+*Defaults Below*
 [source,yaml]
 ----
   ingress:
@@ -112,12 +111,14 @@ Update the values.yaml and configure the Ingress Resource to tell the LoadBalanc
 ----
 ====
 
+---
 
-*Increase the replica count of Camunda Nodes*
+===== *Increase the replica count of Camunda Nodes*
 ====
 
 Update the values.yaml and increase the replica count so the load balancer will send requests to both nodes for a user that is not already logged in to Camunda webapps.
 
+*Defaults Below*
 [source,yaml]
 ----
 general:
@@ -128,9 +129,12 @@ general:
 ----
 ====
 
+---
+
 [[configure-external-database]]
-=== Configure an External Database
-*Install PostgreSQL Database in the cluster*
+=== *Step 2:* Configure an External Database
+
+==== *Install PostgreSQL Database in the cluster*
 ====
 ----
 helm install workflow-database \
@@ -139,7 +143,9 @@ helm install workflow-database \
 ====
 Based on: https://artifacthub.io/packages/helm/bitnami/postgresql
 
-*Create Kubernetes Secret Resource for Postgresql*
+---
+
+===== *Create Kubernetes Secret Resource for Postgresql*
 ====
 ----
 kubectl create secret generic \
@@ -149,13 +155,16 @@ kubectl create secret generic \
 ----
 ====
 
-*Update the values.yaml with database configuration*
+---
+
+===== *Update the values.yaml with database configuration*
 ====
 
 The `credentialsSecertName:` allows us to use a secret resource for DB credentials.
 
 The `url:` uses the deployment name of the postgres resource. This is echoed in the notes after the install.
 
+*Defaults Below*
 [source,yaml]
 ----
 database:
@@ -174,17 +183,106 @@ database:
 For more configuration options see https://github.com/camunda/docker-camunda-bpm-platform/blob/next/README.md
 ====
 
+---
+=== *Step 3:* Configure Camunda
+==== Configure the version of Camunda
+====
+In this case the latest tomcat image is used.
+
+Use the *tag* property to change the version.
+
+See the https://hub.docker.com/r/camunda/camunda-bpm-platform/tags[Camunda Docker Tags] if you need a different version of Camunda.
+
+*Run the Community Version*
+[source,yaml]
+----
+image:
+  repository: camunda/camunda-bpm-platform
+  tag: tomcat-latest
+  pullPolicy: IfNotPresent
+  pullSecrets: []
+----
+---
+*Run the Enterprise Version*
+
+IMPORTANT: https://camunda.com/download/enterprise/[Get an enterprise trial to try Camunda EE]
+
+[source,yaml]
+----
+image:
+repository: registry.camunda.cloud/cambpm-ee/camunda-bpm-platform-ee
+tag: latest
+pullPolicy: IfNotPresent
+pullSecrets:
+- name: camunda-reg-cred
+----
+
+---
+NOTE: If issues arise with pulling the image the workaround is to manually pull the image.
+Run the following commands
+
+ docker login registry.camunda.cloud
+
+ docker pull registry.camunda.cloud/optimize-ee/optimize:latest
+
+---
+
+*Configuring the pullSecrets*
+
+TIP: see https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/[Configuring pull secrets kubernetes doc] and https://kubernetes.io/docs/tasks/configmap-secret/managing-secret-using-kubectl/[Managing Secrets] for more info
+
+Install the secret and name it camunda-reg-cred
+
+----
+kubectl create secret docker-registry camunda-reg-cred --docker-server=registry.camunda.cloud --docker-username=<<user>> --docker-password=<<password>> --docker-email=<your-email>
+----
+
+TIP: You may need to deref special characters in your passwords i.e. --docker-password=mypassword\!isstrong
+
+Check your secret
+----
+kubectl get secret camunda-reg-cred --output=yaml
+
+kubectl get secret camunda-reg-cred --output="jsonpath={.data.\.dockerconfigjson}" | base64 --decode
+----
+
+====
+
+---
+=== *Step 4:* Run the Chart
+====
+**Runing the Chart** the following command to install the chart and apply the configurations to the Kubernetes cluster
+----
+helm install workflow-demo ./charts/camunda-bpm-platform/
+----
+
+**Change the Chart ** -- When you make changes run the following command to apply the changes to the cluster
+----
+helm upgrade workflow-demo ./charts/camunda-bpm-platform/
+----
+
+**Remove the Chart **  -- To remove the installation
+----
+helm uninstall workflow-demo
+----
+
+====
+
 == Whats Next
-- [ ] Configuration for EE License
-- [ ] Configuration for Logging
-** [ ] Configuration for Log Drain
-- [ ] Configuration for Optimize
+- [x] Configuration for EE License
+- [x] Configuration for Secrets Vault (HashiCorp, Spring Cloud Vault)
+- [x] Configure common Camunda configs (Hisotry Level, Engine)
+- [x] Configuration for Optimize
 - [ ] Configure Cawemo on Premise
+- [ ] Adding a Camunda process application
 - [ ] Configuration for LDAP plugin
+- [ ] Adding an Engine plugin
 - [ ] Configuration for metrics
-** with Prometheus
+** [ ] with Prometheus
 - [ ] Configuration for Custom Camunda Build
 ** with Spring-Boot
+- [ ] Configuration for Logging
+** [ ] Configuration for Log Drain
 - [ ] Configuration for CI/CD
 ** [ ] Configuration for ARGO
 ** [ ] Configuration for TERRAFORM
@@ -197,7 +295,7 @@ For more configuration options see https://github.com/camunda/docker-camunda-bpm
 - [ ] Configure Cloud Deployments (GKE, AWS, Azure)
 
 == Based on Camunda Helm
-
+vault server -dev -dev-root-token-id root -dev-listen-address 0.0.0.0:8200
 image:https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/camunda[link=https://artifacthub.io/packages/search?repo=camunda]
 
 *More Info*

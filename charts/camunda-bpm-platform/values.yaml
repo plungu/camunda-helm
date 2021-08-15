@@ -9,10 +9,11 @@ general:
   fullnameOverride: ""
 
 image:
-  repository: camunda/camunda-bpm-platform
-  tag: tomcat-latest
+  repository: registry.camunda.cloud/cambpm-ee/camunda-bpm-platform-ee
+  tag: tomcat-7.15.4
   pullPolicy: IfNotPresent
-  pullSecrets: []
+  pullSecrets:
+    - name: camunda-reg-cred
 
 database:
   # In case H2 database is used.
@@ -102,7 +103,7 @@ autoscaling:
   minReplicas: 2
   maxReplicas: 3
   targetCPUUtilizationPercentage: 80
-  # targetMemoryUtilizationPercentage: 80
+  targetMemoryUtilizationPercentage: 80
 
 nodeSelector: {}
 
