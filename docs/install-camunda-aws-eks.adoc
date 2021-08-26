@@ -14,6 +14,8 @@ NOTE: you can skip this if you have done it already with Camunda-Optimize-HELM a
 
 See link:provision-aws-eks.adoc[Provision EKS Cluster] keep in mind this is just for testing and not intended for production.
 
+== *Step 2*: [[setup-cluster]] Setup Cluster
+
 === Install Postgres
 ====
 
@@ -39,6 +41,8 @@ See doc link:../README.adoc#_configure_the_version_of_camunda[Install docker-reg
 
 See the doc https://docs.aws.amazon.com/eks/latest/userguide/aws-load-balancer-controller.html[here]
 
+== *Step 3:* [[configure-helm]] Configure the HELM Charts for Camunda Platform Install
+
 === Configure Kubernetes Ingress
 
 IMPORTANT: make sure to disable the Nginx Ingress Config
@@ -61,7 +65,7 @@ elbIngress:
 #        - camunda-bpm-platform.local
 ----
 
-=== Run the HELM install
+== *Step 4:* Run the HELM install
 
   helm install workflow-demo ./charts/camunda-bpm-platform/
 
@@ -72,7 +76,7 @@ elbIngress:
 The value in the address field is the endpoint for accessing Camunda. If you want a more permanent address configure DNS service.
 
 
-=== Troubleshooting
+== Troubleshooting
 
 Get the cluster config
 
