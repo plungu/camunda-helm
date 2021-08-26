@@ -30,7 +30,7 @@ database:
 # Using NodePort for AWS EKS Controller
 # Use ClusterIP for Nginx Controller
 service:
-  type: NodePort
+  type: ClusterIP
   port: 8080
   portName: http
 
