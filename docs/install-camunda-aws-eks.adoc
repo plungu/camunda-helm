@@ -4,9 +4,8 @@ v1.0, 2020-08-13
 :toc:
 
 == Disclaimer
-----
-This document is not intended to create production envronemnt. Rather, it's a refrence to demonstarte a basic simple install of Camunda Platform on AWS EKS. Also to clarify provide practical architectural guidance for Camunda Optiimze in Kubernetes environments.
-----
+
+IMPORTANT: This document is not intended to create production envronemnt. Rather, it's a refrence to demonstarte a basic simple install of Camunda Platform on AWS EKS. Also to clarify provide practical architectural guidance for Camunda Optiimze in Kubernetes environments.
 
 == *Step 1*: [[provision-cluster]] Provision Cluster
 
