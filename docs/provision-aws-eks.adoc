@@ -1,0 +1,66 @@
+= AWS EKS Provision Cluster
+Doc Writer <paul.lungu@camunda.com>
+v1.0, 2020-08-13
+:toc:
+
+== Step 1: Install and use CLI tools to provision EKS cluster
+
+See docs https://eksctl.io/introduction/[here]
+
+The purpose of this doc is to install the tools necessary to provision the EKS cluster, work with the cluster, install Optimize and provision the cluster itself.
+
+==== Install eksctl tool
+
+ brew tap weaveworks/tap
+
+ brew install weaveworks/tap/eksctl
+
+NOTE: you may need to install XCODE
+
+==== Install AWS CLI
+
+ curl "https://awscli.amazonaws.com/AWSCLIV2.pkg" -o "AWSCLIV2.pkg"
+
+ sudo installer -pkg AWSCLIV2.pkg -target /
+
+==== Create IAM user on AWS
+
+https://docs.aws.amazon.com/IAM/latest/UserGuide/id_users_create.html[See AWS docs]
+
+==== Add configs and credentials to your local (MAC) home dir
+
+https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-quickstart.html[See the AWS docs for details]
+
+Create the files
+
+- `nano ~/.aws/credentials`
+- `nano ~/.aws/config`
+
+https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html[See the AWS docs for details]
+
+- copy the IAM user creds into the file
+
+
+== Step 2: Provision the cluster
+
+=== Create the cluster
+
+ eksctl create cluster --name camunda-cluster --version 1.17 --region us-west-2 --nodegroup-name camunda-nodes --node-type t2.micro --nodes 2
+
+==== Remove the cluster if needed
+
+ eksctl delete cluster --name camunda-cluster
+
+TIP: See the cluster you provisioned in https://console.aws.amazon.com/eks/home[AWS EKS Console]
+
+==== Use aws cli add the context for the EKS kuberentes cluster to kubectl
+
+ aws eks --region us-west-2 update-kubeconfig --name camunda-cluster
+
+See more about CLI https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2-mac.html#cliv2-mac-install-cmd[install here] and https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-quickstart.html[config quickstart here]
+
+===== Check the context
+
+ kubectl config current-context
+
+ cat /Users/paullungu/.kube/config

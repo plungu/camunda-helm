@@ -1,0 +1,104 @@
+= AWS EKS Camunda Install
+Doc Writer <paul.lungu@camunda.com>
+v1.0, 2020-08-13
+:toc:
+
+== Disclaimer
+----
+This document is not intended to create production envronemnt. Rather, it's a refrence to demonstarte a basic simple install of Camunda Platform on AWS EKS. Also to clarify provide practical architectural guidance for Camunda Optiimze in Kubernetes environments.
+----
+
+== *Step 1*: [[provision-cluster]] Provision Cluster
+
+NOTE: you can skip this if you have done it already with Camunda-Optimize-HELM and you don't want a separate cluster for Camunda. So you will be installing into same EKS Cluster. Other wise see
+
+See link:provision-aws-eks.adoc[Provision EKS Cluster] keep in mind this is just for testing and not intended for production.
+
+=== Install Postgres
+====
+
+See doc link:../README.adoc#_install_postgresql_database_in_the_cluster[Install Database]
+
+This assumes you will use the postgres image defined in the docs here.
+
+Which is a imaged pulled and configured in the HELM chart.
+
+If you provision another Postgres you will need to change the values.yaml
+====
+
+==== Install the Database Secret
+
+See doc link:../README.adoc#_create_kubernetes_secret_resource_for_postgresql[Install Database Secret]
+
+
+=== Install the docker-registry secret
+
+See doc link:../README.adoc#_configure_the_version_of_camunda[Install docker-registry secret ]
+
+=== Install AWS Ingress Controller
+
+See the doc https://docs.aws.amazon.com/eks/latest/userguide/aws-load-balancer-controller.html[here]
+
+=== Configure Kubernetes Ingress
+
+IMPORTANT: make sure to disable the Nginx Ingress Config
+
+[source,yaml]
+----
+# Ingress config for AWS EKS ingress controller
+elbIngress:
+  enabled: true
+  annotations: {
+    kubernetes.io/ingress.class: alb,
+    alb.ingress.kubernetes.io/scheme: internet-facing,
+#    alb.ingress.kubernetes.io/target-type: ip,
+  }
+  hosts:
+    path: /*
+#  tls: []
+#    - secretName: camunda-bpm-platform-tls
+#      hosts:
+#        - camunda-bpm-platform.local
+----
+
+=== Run the HELM install
+
+  helm install workflow-demo ./charts/camunda-bpm-platform/
+
+=== Get the Endpoint to access Camunda Platform
+
+  kubectl get ingress --all-namespaces
+
+The value in the address field is the endpoint for accessing Camunda. If you want a more permanent address configure DNS service.
+
+
+=== Troubleshooting
+
+Get the cluster config
+
+ eksctl get cluster --name camunda-cluster
+
+Delete stuck pods
+
+ kubectl delete pod <PODNAME> --grace-period=0 --force --namespace <NAMESPACE>
+
+Get pods
+
+  kubectl get pods
+
+Get logs for pod
+
+  kubectl logs -f <pod-name>
+
+Get all services
+
+  kubectl get svc --all-namespaces
+
+Get the details of a kubernetes component
+
+  kubectl describe <pods, svc, ingress, deploy>
+
+Pretty print more info about pods
+
+  kubectl get nodes -o wide |  awk {'print $1" " $2 " " $7'} | column -t
+

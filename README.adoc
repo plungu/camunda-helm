@@ -9,6 +9,7 @@ v1.0, 2020-03-15
 - Good documentation and example to assist in getting running quickly in Kubernetes
 - *NOT* intended as a production ready configuration
 
+NOTE: for example of installing on AWS EKS see link:docs/deploy-aws-eks.adoc[Install Camunda Platform on EKS]
 
 == What is configured in this chart
 - [x] Camunda BPM CE
@@ -137,8 +138,7 @@ general:
 ==== *Install PostgreSQL Database in the cluster*
 ====
 ----
-helm install workflow-database \
-  --set postgresqlUsername=workflow,postgresqlPassword=workflow,postgresqlDatabase=workflow bitnami/postgresql
+helm install workflow-database --set postgresqlUsername=workflow,postgresqlPassword=workflow,postgresqlDatabase=workflow bitnami/postgresql
 ----
 ====
 Based on: https://artifacthub.io/packages/helm/bitnami/postgresql
@@ -210,11 +210,11 @@ IMPORTANT: https://camunda.com/download/enterprise/[Get an enterprise trial to t
 [source,yaml]
 ----
 image:
-repository: registry.camunda.cloud/cambpm-ee/camunda-bpm-platform-ee
-tag: latest
-pullPolicy: IfNotPresent
-pullSecrets:
-- name: camunda-reg-cred
+  repository: registry.camunda.cloud/cambpm-ee/camunda-bpm-platform-ee
+  tag: latest
+  pullPolicy: IfNotPresent
+  pullSecrets:
+  - name: camunda-reg-cred
 ----
 
 ---

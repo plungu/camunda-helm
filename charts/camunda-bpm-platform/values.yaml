@@ -4,7 +4,7 @@
 
 general:
   debug: true
-  replicaCount: 2
+  replicaCount: 1
   nameOverride: ""
   fullnameOverride: ""
 
@@ -27,8 +27,10 @@ database:
     driver: "org.postgresql.Driver"
     url: "jdbc:postgresql://workflow-database-postgresql.default.svc.cluster.local:5432/workflow"
 
+# Using NodePort for AWS EKS Controller
+# Use ClusterIP for Nginx Controller
 service:
-  type: ClusterIP
+  type: NodePort
   port: 8080
   portName: http
 
@@ -55,6 +57,7 @@ serviceAccount:
 # See link below to install nginx controller
 # https://artifacthub.io/packages/helm/bitnami/nginx-ingress-controller
 
+# Kubernetes ingress config for Nginx Ingress Controller
 ingress:
   enabled: true
   annotations: {
@@ -74,6 +77,21 @@ ingress:
   #  - secretName: camunda-bpm-platform-tls
   #    hosts:
   #      - camunda-bpm-platform.local
+
+# Ingress config for AWS EKS ingress controller
+elbIngress:
+  enabled: false
+  annotations: {
+    kubernetes.io/ingress.class: alb,
+    alb.ingress.kubernetes.io/scheme: internet-facing,
+#    alb.ingress.kubernetes.io/target-type: ip,
+  }
+  hosts:
+    path: /*
+#  tls: []
+#    - secretName: camunda-bpm-platform-tls
+#      hosts:
+#        - camunda-bpm-platform.local
 
 podAnnotations: {}
 
