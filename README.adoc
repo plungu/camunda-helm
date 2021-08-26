@@ -9,7 +9,7 @@ v1.0, 2020-03-15
 - Good documentation and example to assist in getting running quickly in Kubernetes
 - *NOT* intended as a production ready configuration
 
-NOTE: for example of installing on AWS EKS see link:docs/deploy-aws-eks.adoc[Install Camunda Platform on EKS]
+NOTE: for example of installing on AWS EKS see link:docs/install-camunda-aws-eks.adoc[Install Camunda Platform on EKS]
 
 == What is configured in this chart
 - [x] Camunda BPM CE
