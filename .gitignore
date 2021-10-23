@@ -40,6 +40,8 @@ bin/*
 .project
 /.bin
 /_test/secrets/*.json
+*.pdf
+*.html
 
 # OSX leaves these everywhere on SMB shares
 ._*

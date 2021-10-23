@@ -138,7 +138,7 @@ general:
 ==== *Install PostgreSQL Database in the cluster*
 ====
 ----
-helm install workflow-database --set postgresqlUsername=workflow,postgresqlPassword=workflow,postgresqlDatabase=workflow bitnami/postgresql
+helm install workflow-database --set postgresqlPostgresPassword=workflow, postgresqlUsername=workflow,postgresqlPassword=workflow,postgresqlDatabase=workflow bitnami/postgresql
 ----
 ====
 Based on: https://artifacthub.io/packages/helm/bitnami/postgresql
