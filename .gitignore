@@ -1,5 +1,7 @@
 /.idea/
 .DS_Store
+/.github/
+/.chglog/
 
 Skip to content
 Search or jump to…
@@ -42,6 +44,7 @@ bin/*
 /_test/secrets/*.json
 *.pdf
 *.html
+iam*
 
 # OSX leaves these everywhere on SMB shares
 ._*
@@ -72,3 +75,7 @@ Session.vim
 **/charts/*.tgz
 
 .history
+.chglog/
+.github/config/
+iam_policy.json
+iam_policy_v1_to_v2_additional.json

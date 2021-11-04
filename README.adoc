@@ -169,15 +169,11 @@ The `url:` uses the deployment name of the postgres resource. This is echoed in 
 ----
 database:
   # In case H2 database is used.
-  internal:
-    enabled: false
-    diskSize: 1G
+  diskSize: 1G
   # In case PostgreSQL or MySQL databases are used.
-  external:
-    enabled: true
-    credentialsSecertName: "workflow-database-credentials"
-    driver: "org.postgresql.Driver"
-    url: "jdbc:postgresql://workflow-database-postgresql.default.svc.cluster.local:5432/workflow"
+  credentialsSecertName: "workflow-database-credentials"
+  driver: "org.postgresql.Driver"
+  url: "jdbc:postgresql://workflow-database-postgresql.default.svc.cluster.local:5432/workflow"
 ----
 
 For more configuration options see https://github.com/camunda/docker-camunda-bpm-platform/blob/next/README.md
