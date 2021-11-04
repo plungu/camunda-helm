@@ -246,6 +246,21 @@ kubectl get secret camunda-reg-cred --output=yaml
 kubectl get secret camunda-reg-cred --output="jsonpath={.data.\.dockerconfigjson}" | base64 --decode
 ----
 
+*Enable License Config*
+[source,yaml]
+----
+license:
+  enabled: true
+----
+
+*Configure Enterprise License*
+Put the license in the data-license.yaml
+[source,yaml]
+----
+    --------------- BEGIN CAMUNDA LICENSE KEY ---------------
+    --------------- END CAMUNDA LICENSE KEY ---------------
+----
+
 ====
 
 ---
