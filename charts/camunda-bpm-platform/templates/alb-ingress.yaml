@@ -1,4 +1,4 @@
-{{- if .Values.elbIngress.enabled -}}
+{{- if .Values.albIngress.enabled -}}
 {{- $fullName := include "camunda-bpm-platform.fullname" . -}}
 {{- $svcPort := .Values.service.port -}}
 {{- if semverCompare ">=1.14-0" .Capabilities.KubeVersion.GitVersion -}}
@@ -11,7 +11,7 @@ metadata:
   name: {{ $fullName }}
   labels:
     {{- include "camunda-bpm-platform.labels" . | nindent 4 }}
-  {{- with .Values.elbIngress.annotations }}
+  {{- with .Values.albIngress.annotations }}
   annotations:
     {{- toYaml . | nindent 4 }}
   {{- end }}
@@ -19,7 +19,7 @@ spec:
   rules:
     - http:
        paths:
-         - path: {{ .Values.elbIngress.hosts.path }}
+         - path: {{ .Values.albIngress.hosts.path }}
            backend:
              serviceName: {{ $fullName }}
              servicePort: {{ $svcPort }}

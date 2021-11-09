@@ -15,6 +15,13 @@ image:
   pullSecrets:
     - name: camunda-reg-cred
 
+processAppWar:
+  enabled: true
+  name: project.war
+
+license:
+  enabled: true
+
 database:
   # In case H2 database is used.
   internal:
@@ -79,7 +86,7 @@ ingress:
   #      - camunda-bpm-platform.local
 
 # Ingress config for AWS EKS ingress controller
-elbIngress:
+albIngress:
   enabled: false
   annotations: {
     kubernetes.io/ingress.class: alb,

@@ -76,10 +76,18 @@ spec:
           - name: camunda-h2-dbs
             mountPath: /camunda/camunda-h2-dbs
           {{- end }}
+          {{ if .Values.license.enabled -}}
           volumeMounts:
           - mountPath: /camunda/.camunda/license.txt
             subPath: license.txt
             name: camunda-license
+          {{- end}}
+          {{ if .Values.processAppWar.enabled -}}
+          volumeMounts:
+          - name: process-app-war
+            mountPath: /camunda/webapps/{{.Values.processAppWar.name}}
+            subPath: {{.Values.processAppWar.name}}
+          {{- end}}
 
       {{ if .Values.database.internal.enabled -}}
       volumes:
@@ -87,10 +95,18 @@ spec:
           persistentVolumeClaim:
             claimName: {{ include "camunda-bpm-platform.fullname" . }}-database
       {{- end }}
+      {{ if .Values.license.enabled -}}
       volumes:
         - name: camunda-license
           secret:
             secretName: camunda-license
+      {{- end}}
+      {{ if .Values.processAppWar.enabled -}}
+      volumes:
+        - name: process-app-war
+          configMap:
+            name: process-app-war
+      {{- end}}
 
       {{- with .Values.nodeSelector }}
       nodeSelector:

@@ -9,7 +9,7 @@ v1.0, 2020-03-15
 - Good documentation and example to assist in getting running quickly in Kubernetes
 - *NOT* intended as a production ready configuration
 
-NOTE: for example of installing on AWS EKS see link:docs/install-camunda-aws-eks.adoc[Install Camunda Platform on EKS]
+NOTE: for example of installing on AWS EKS see link:docs/example-install-camunda-aws-eks.adoc[Install Camunda Platform on EKS]
 
 == What is configured in this chart
 - [x] Camunda BPM CE
@@ -244,6 +244,31 @@ kubectl get secret camunda-reg-cred --output="jsonpath={.data.\.dockerconfigjson
 
 ====
 
+=== *Step 3-A* Install a Process Application
+====
+
+Build the process application by running mvn command in your process app directory
+
+ mvn clean package -DskipTests
+
+copy the file location from the build
+
+ [INFO] Building war: /Users/paullungu/projects/camunda-poc-starter-parent/camunda-servlet-project/target/project.war
+
+Create a configmap for the process application war
+
+ kubectl create configmap process-app-war --from-file /Users/paullungu/projects/camunda-poc-starter-parent/camunda-servlet-project/target/project.war
+
+Use the name of the .war file here
+[source,yaml]
+----
+processAppWar:
+  enabled: true
+  name: project.war
+----
+
+====
+
 ---
 === *Step 4:* Run the Chart
 ====
@@ -269,8 +294,7 @@ helm uninstall workflow-demo
 - [x] Configuration for Secrets Vault (HashiCorp, Spring Cloud Vault)
 - [x] Configure common Camunda configs (Hisotry Level, Engine)
 - [x] Configuration for Optimize
-- [ ] Configure Cawemo on Premise
-- [ ] Adding a Camunda process application
+- [x] Adding a Camunda process application
 - [ ] Configuration for LDAP plugin
 - [ ] Adding an Engine plugin
 - [ ] Configuration for metrics
