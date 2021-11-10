@@ -38,11 +38,13 @@ extraEnvs: []
 # however, H2 is not supported in a clustered scenario.
 # So for real-world workloads, an external database like PostgreSQL should be used.
 database:
+  # In case H2 database is used.
+  diskSize: 1G
   # In case PostgreSQL or MySQL databases are used.
   enabled: true
-  driver: "org.postgresql.Driver"
-  url: "jdbc:postgresql://workflow-database-postgresql.default.svc.cluster.local:5432/workflow"
-  credentialsSecertName: "workflow-database-credentials"
+  driver: org.postgresql.Driver
+  url: jdbc:postgresql://workflow-database-postgresql.default.svc.cluster.local:5432/workflow
+  credentialsSecertName: workflow-database-credentials
   credentialsSecretKeys:
     username: DB_USERNAME
     password: DB_PASSWORD

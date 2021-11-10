@@ -56,12 +56,12 @@ spec:
             - name: DB_USERNAME
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.database.credentialsSecretName | default $fullName }}
+                  name: {{ .Values.database.credentialsSecertName | default $fullName }}
                   key: {{ .Values.database.credentialsSecretKeys.username }}
             - name: DB_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.database.credentialsSecretName | default $fullName }}
+                  name: {{ .Values.database.credentialsSecertName | default $fullName }}
                   key: {{ .Values.database.credentialsSecretKeys.password }}
           {{- if .Values.extraEnvs }}
             {{- toYaml .Values.extraEnvs | nindent 12 }}
