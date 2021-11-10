@@ -261,6 +261,7 @@ Put the license in the data-license.yaml
 
 === *Step 3-A* Install a Process Application
 ====
+https://docs.camunda.org/manual/7.16/user-guide/process-applications/maven-archetypes/[Create a process application from maven archetype]
 
 Build the process application by running mvn command in your process app directory
 
