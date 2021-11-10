@@ -1,7 +1,8 @@
+{{- $fullName := include "camunda-bpm-platform.fullname" . -}}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "camunda-bpm-platform.fullname" . }}
+  name: {{ $fullName }}
   labels:
     {{- include "camunda-bpm-platform.labels" . | nindent 4 }}
 spec:
@@ -27,33 +28,44 @@ spec:
       serviceAccountName: {{ include "camunda-bpm-platform.serviceAccountName" . }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      {{- if .Values.initContainers }}
+      initContainers:
+        {{- toYaml .Values.initContainers | nindent 6 }}
+      {{- end }}
       containers:
         - name: {{ .Chart.Name }}
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          {{ if .Values.image.command -}}
+          command: {{ .Values.image.command }}
+          {{- end }}
+          {{- if .Values.image.args }}
+          args: {{ .Values.image.args }}
+          {{- end }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           env:
             - name: DEBUG
               value: "{{ .Values.general.debug }}"
             - name: JMX_PROMETHEUS
               value: "{{ .Values.metrics.enabled }}"
-            {{- if .Values.database.external.enabled }}
             - name: DB_DRIVER
-              value: "{{ .Values.database.external.driver }}"
+              value: "{{ .Values.database.driver }}"
             - name: DB_URL
-              value: "{{ .Values.database.external.url }}"
+              value: "{{ .Values.database.url }}"
             - name: DB_USERNAME
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.database.external.credentialsSecertName }}
-                  key: DB_USERNAME
+                  name: {{ .Values.database.credentialsSecretName | default $fullName }}
+                  key: {{ .Values.database.credentialsSecretKeys.username }}
             - name: DB_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.database.external.credentialsSecertName }}
-                  key: DB_PASSWORD
-            {{- end }}
+                  name: {{ .Values.database.credentialsSecretName | default $fullName }}
+                  key: {{ .Values.database.credentialsSecretKeys.password }}
+          {{- if .Values.extraEnvs }}
+            {{- toYaml .Values.extraEnvs | nindent 12 }}
+          {{- end }}
           ports:
             - name: {{ .Values.service.portName }}
               containerPort: {{ .Values.service.port }}
@@ -63,17 +75,23 @@ spec:
               containerPort: {{ .Values.metrics.service.port }}
               protocol: TCP
             {{- end }}
+                {{ if .Values.startupProbe.enabled -}}
+                startupProbe:
+                  {{- toYaml .Values.startupProbe.config | nindent 12 }}
+                {{- end }}
+          {{ if .Values.readinessProbe.enabled -}}
           readinessProbe:
-            httpGet:
-              path: /camunda/
-              port: http
-            initialDelaySeconds: 60
-            periodSeconds: 60
+            {{- toYaml .Values.readinessProbe.config | nindent 12 }}
+          {{- end }}
+          {{ if .Values.livenessProbe.enabled -}}
+          livenessProbe:
+            {{- toYaml .Values.livenessProbe.config | nindent 12 }}
+          {{- end }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
-          {{ if .Values.database.internal.enabled -}}
+          {{ if eq (include "camunda-bpm-platform.h2DatabaseIsUsed" .) "true" -}}
           volumeMounts:
-          - name: camunda-h2-dbs
+          - name: {{ $fullName }}-database-h2
             mountPath: /camunda/camunda-h2-dbs
           {{- end }}
           {{ if .Values.license.enabled -}}
@@ -89,11 +107,11 @@ spec:
             subPath: {{.Values.processAppWar.name}}
           {{- end}}
 
-      {{ if .Values.database.internal.enabled -}}
+      {{ if eq (include "camunda-bpm-platform.h2DatabaseIsUsed" .) "true" -}}
       volumes:
-        - name: camunda-h2-dbs
+        - name: {{ $fullName }}-database-h2
           persistentVolumeClaim:
-            claimName: {{ include "camunda-bpm-platform.fullname" . }}-database
+            claimName: {{ $fullName }}-database-h2
       {{- end }}
       {{ if .Values.license.enabled -}}
       volumes:
